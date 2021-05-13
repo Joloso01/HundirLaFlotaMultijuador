@@ -23,17 +23,18 @@ public class Tablero {
             for (int j = 0; j < 10; j++) {
                 if (i == jugada.x && j == jugada.y){
                     String barco = tablero_PosicionBarcos[i][j];
-                    if (barco.equals("d")){
-                        tablero_jugadores[i][j] = jugada.Nom;
-                        return "Impacto en un destructor";
-                    }else if (barco.equals("f")){
-                        tablero_jugadores[i][j] = jugada.Nom;
-                        return "Impacto en una fragata";
-                    }else if (barco.equals("p")){
-                        tablero_jugadores[i][j] = jugada.Nom;
-                        return "Impacto en un portaaviones";
-                    }else {
-                        return "No ha habido impacto";
+                    switch (barco) {
+                        case "d":
+                            tablero_jugadores[i][j] = jugada.Nom;
+                            return "Impacto en un destructor";
+                        case "f":
+                            tablero_jugadores[i][j] = jugada.Nom;
+                            return "Impacto en una fragata";
+                        case "p":
+                            tablero_jugadores[i][j] = jugada.Nom;
+                            return "Impacto en un portaaviones";
+                        default:
+                            return "No ha habido impacto";
                     }
                 }
             }
