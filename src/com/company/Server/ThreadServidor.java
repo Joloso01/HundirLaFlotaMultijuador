@@ -22,7 +22,7 @@ public class ThreadServidor implements Runnable{
 
     public ThreadServidor(Socket clientSocket) throws IOException {
         this.clientSocket = clientSocket;
-//        llista = ns;
+        tablero = new Tablero();
         System.out.println(clientSocket.getInetAddress());
         acabat = false;
         oos = new ObjectOutputStream(clientSocket.getOutputStream());

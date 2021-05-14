@@ -5,7 +5,7 @@ import java.util.Map;
 public class Tablero {
     public static final long serialVersionUID = 1L;
     private String[][] tablero_PosicionBarcos;
-    private String[][] tablero_jugadores;
+    public String[][] tablero_jugadores;
     public Map<String,Integer> jugadores_conectados;
     private boolean colocado = false;
 
@@ -27,7 +27,6 @@ public class Tablero {
                     tablero_PosicionBarcos[x][y] = "F";
                     colocado = true;
                 }
-
             }
             colocado = false;
         }
@@ -40,7 +39,6 @@ public class Tablero {
                     tablero_PosicionBarcos[x][y] = "D";
                     colocado = true;
                 }
-
             }
             colocado = false;
         }
@@ -53,12 +51,9 @@ public class Tablero {
                     tablero_PosicionBarcos[x][y] = "P";
                     colocado = true;
                 }
-
             }
             colocado = false;
         }
-
-
 
         for (int i = 0; i < 10; i++) {
             for (int j = 0; j < 10; j++) {
@@ -75,35 +70,18 @@ public class Tablero {
         jugadores_conectados.put(nombre,getNumeroJugadores()+1);
     }
 
-    public String haImpactado(Jugada jugada){
-        for (int i = 0; i < 10; i++) {
-            for (int j = 0; j < 10; j++) {
-                if (i == jugada.x && j == jugada.y){
-                    String barco = tablero_PosicionBarcos[i][j];
-                    switch (barco) {
-                        case "d":
-                            tablero_jugadores[i][j] = jugada.Nom;
-                            return "Impacto en un destructor";
-                        case "f":
-                            tablero_jugadores[i][j] = jugada.Nom;
-                            return "Impacto en una fragata";
-                        case "p":
-                            tablero_jugadores[i][j] = jugada.Nom;
-                            return "Impacto en un portaaviones";
-                        default:
-                            return "No ha habido impacto";
-                    }
+    public String[][] haImpactado(Jugada jugada){
+        if (!jugada.Nom.equals("nuevoJugador")){
+            for (int i = 0; i < 10; i++) {
+                for (int j = 0; j < 10; j++) {
+                    if (i == jugada.x && j == jugada.y && !tablero_PosicionBarcos[i][j].equals("A")){
+                       tablero_jugadores[i][j] = jugada.Nom;
+                       return tablero_jugadores;
+                    }else return tablero_jugadores;
                 }
             }
-        }
-        return null;
-    }
-
-    public String comprobarBarcoHundido(String nombre){
-        for (int i = 0; i < 10; i++) {
-            for (int j = 0; j < 10; j++) {
-
-            }
+        }else {
+            return tablero_jugadores;
         }
         return null;
     }

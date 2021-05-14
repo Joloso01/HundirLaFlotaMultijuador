@@ -43,9 +43,9 @@ public class ClienteTCP extends Thread{
             //el client atén el port fins que decideix finalitzar
             while(continueConnected){
                 Jugada jugada = getRequest();
+                tablero.tablero_jugadores = (String[][]) ois.readObject();
                 oos.writeObject(jugada);
                 oos.flush();
-                tablero = (Tablero) ois.readObject();
                 //processament de les dades rebudes i obtenció d'una nova petició
                 //enviament el número i els intents
 
