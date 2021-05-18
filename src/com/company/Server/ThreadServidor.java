@@ -8,11 +8,12 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class ThreadServidor implements Runnable{
 
+    String nombreUsuario;
     Socket clientSocket;
     ObjectInputStream ois;
     ObjectOutputStream oos;
@@ -20,24 +21,29 @@ public class ThreadServidor implements Runnable{
     boolean acabat;
     Tablero tablero;
     Respuesta respuesta;
+    List<ThreadServidor> usuarios = new ArrayList<>();
 
-    public ThreadServidor(Socket clientSocket, Tablero tablero) throws IOException {
+    public ThreadServidor(Socket clientSocket) throws IOException {
         this.clientSocket = clientSocket;
-        this.tablero = tablero;
+        tablero = new Tablero();
         System.out.println(clientSocket.getInetAddress());
         acabat = false;
         oos = new ObjectOutputStream(clientSocket.getOutputStream());
         ois = new ObjectInputStream(clientSocket.getInputStream());
-
     }
 
     @Override
     public void run() {
         try {
-            while(!acabat) {
+            while(true) {
                 jugada = (Jugada) ois.readObject();
                 System.out.println(jugada.getNom());
-                respuesta = generaResposta(tablero);
+                for (ThreadServidor ts : usuarios){
+                    if (ts.getNombreUsuario() != nombreUsuario){
+                        respuesta = generaResposta(ts.tablero);
+
+                    }
+                }
                 oos.writeObject(respuesta);
                 oos.flush();
             }
@@ -53,12 +59,36 @@ public class ThreadServidor implements Runnable{
     }
 
     public Respuesta generaResposta(Tablero tablero) {
-        Respuesta respuesta = new Respuesta();
         if (tablero != null){
-        respuesta.setRespuesta_Tablero(tablero.tablero_jugadores);
-        respuesta.setImpacto(tablero.haImpactado(jugada));
+        for (ThreadServidor ts:usuarios){
+            if (ts.getNombreUsuario() != nombreUsuario){
+                respuesta.setNombreJugador(nombreUsuario);
+                respuesta.setRespuesta_Tablero(tablero.tablero_jugadores);
+                respuesta.setImpacto(tablero.haImpactado(jugada));
+            }
+        }
             System.out.println("se ha enviado la respuesta: "+respuesta);
         return respuesta;
         }else return null;
+    }
+
+    public Tablero getTablero() {
+        return tablero;
+    }
+
+    public List<ThreadServidor> getUsuarios() {
+        return usuarios;
+    }
+
+    public void setUsuarios(List<ThreadServidor> usuarios) {
+        this.usuarios = usuarios;
+    }
+
+    public String getNombreUsuario() {
+        return nombreUsuario;
+    }
+
+    public void setNombreUsuario(String nombreUsuario) {
+        this.nombreUsuario = nombreUsuario;
     }
 }

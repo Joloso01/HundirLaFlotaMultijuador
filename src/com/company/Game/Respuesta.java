@@ -4,6 +4,7 @@ import java.io.Serializable;
 
 public class Respuesta implements Serializable {
     public static final long serialVersionUID = 2L;
+    String nombreJugador;
     String[][] respuesta_Tablero;
     String impacto;
 
@@ -21,5 +22,13 @@ public class Respuesta implements Serializable {
 
     public void setImpacto(String impacto) {
         this.impacto = impacto;
+    }
+
+    public String getNombreJugador() {
+        return nombreJugador;
+    }
+
+    public void setNombreJugador(String nombreJugador) {
+        this.nombreJugador = nombreJugador;
     }
 }

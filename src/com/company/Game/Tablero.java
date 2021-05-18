@@ -4,15 +4,19 @@ import java.util.Map;
 
 public class Tablero {
     public static final long serialVersionUID = 1L;
+    private String nombreTablero;
     private String[][] tablero_PosicionBarcos;
     public String[][] tablero_jugadores;
-    public Map<String,Integer> jugadores_conectados;
     private boolean colocado = false;
+    private int fragatas,destructores,portaaviones;
 
 
     public Tablero() {
         tablero_PosicionBarcos = new String[10][10];
         tablero_jugadores = new String[10][10];
+        fragatas = 3;
+        destructores = 4;
+        portaaviones = 1;
     }
 
     public void rellenarTableroPosicion() {
@@ -65,10 +69,6 @@ public class Tablero {
         }
     }
 
-    public void addPlayer(String nombre){
-        jugadores_conectados.put(nombre,getNumeroJugadores()+1);
-    }
-
     public String haImpactado(Jugada jugada){
         for (int i = 0; i < 10; i++) {
             for (int j = 0; j < 10; j++) {
@@ -76,12 +76,15 @@ public class Tablero {
                     String barco = tablero_PosicionBarcos[i][j];
                     if (barco.equals("d")){
                         tablero_jugadores[i][j] = jugada.Nom;
+                        destructores--;
                         return "Impacto en un destructor";
                     }else if (barco.equals("f")){
                         tablero_jugadores[i][j] = jugada.Nom;
+                        fragatas--;
                         return "Impacto en una fragata";
                     }else if (barco.equals("p")){
                         tablero_jugadores[i][j] = jugada.Nom;
+                        portaaviones--;
                         return "Impacto en un portaaviones";
                     }else {
                         return "No ha habido impacto";
@@ -92,8 +95,12 @@ public class Tablero {
         return null;
     }
 
-    public Integer getNumeroJugadores(){
-        return jugadores_conectados.size();
+    public String getNombreTablero() {
+        return nombreTablero;
+    }
+
+    public void setNombreTablero(String nombreTablero) {
+        this.nombreTablero = nombreTablero;
     }
 
     public String[][] getTablero() {

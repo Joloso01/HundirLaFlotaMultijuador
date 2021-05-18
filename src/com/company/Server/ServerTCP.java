@@ -5,6 +5,8 @@ import com.company.Game.Tablero;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -12,14 +14,12 @@ public class ServerTCP {
 
     private final int MAX_JUGADORS = 2;
     private int jugadoresConectados=0;
+    private List<ThreadServidor>threadServidors = new ArrayList<>();
 
     int port;
-    Tablero tablero;
 
     public ServerTCP(int port ) {
         this.port = port;
-        tablero = new Tablero();
-        tablero.rellenarTableroPosicion();
     }
 
     public void listen() {
@@ -27,16 +27,23 @@ public class ServerTCP {
         Socket clientSocket;
         try {
             serverSocket = new ServerSocket(port);
-            while(true) { //esperar connexió del client i llançar thread
+            while(true) {
                 clientSocket = serverSocket.accept();
-                //Llançar Thread per establir la comunicació
                 if (jugadoresConectados < MAX_JUGADORS){
-                    ThreadServidor FilServidor = new ThreadServidor(clientSocket,tablero);
+                    ThreadServidor FilServidor = new ThreadServidor(clientSocket);
+                    threadServidors.add(FilServidor);
+                    if (threadServidors.size() == 1){
+                        FilServidor.setNombreUsuario("jugador1");
+                    }else {
+                        FilServidor.setNombreUsuario("jugador2");
+                    }
                     jugadoresConectados++;
+                    for (ThreadServidor ts: threadServidors){
+                        ts.setUsuarios(threadServidors);
+                    }
                     Thread client = new Thread(FilServidor);
                     client.start();
                 }
-
             }
         } catch (IOException ex) {
             Logger.getLogger(ServerTCP.class.getName()).log(Level.SEVERE, null, ex);

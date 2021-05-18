@@ -30,6 +30,8 @@ public class ClienteTCP extends Thread{
         this.hostname = hostname;
         this.port = port;
         continueConnected = true;
+        tablero = new Tablero();
+        tablero.rellenarTableroPosicion();
     }
 
     public void run() {
@@ -59,21 +61,24 @@ public class ClienteTCP extends Thread{
     }
 
     private void comprobarRespuesta(Respuesta respuestaServer) {
-
+        if (respuestaServer != null){
+            tablero.setTablero(respuestaServer.getRespuesta_Tablero());
+            System.out.println(respuestaServer.getImpacto());
+        }
     }
 
     public Jugada getRequest() {
         Jugada jugada = new Jugada();
         int columna,fila;
 
+        if (respuestaServer != null){
+            jugada.setNom(respuestaServer.getNombreJugador());
+        }
+
         if (numeroJugada == 0){
-
-            System.out.println("Nombre de usuario: ");
-            nombreUsuaior = sc.nextLine();
-            jugada.setNom("nuevoJugador");
-
+            numeroJugada++;
+            return jugada;
         }else {
-
             System.out.println("Selecciona columna: ");
             columna = sc.nextInt();
             System.out.println();
@@ -83,10 +88,12 @@ public class ClienteTCP extends Thread{
             jugada.setNom(nombreUsuaior);
             jugada.setX(columna);
             jugada.setY(fila);
+
+            numeroJugada++;
+            return jugada;
         }
 
-        numeroJugada++;
-        return jugada;
+
     }
 
     public boolean mustFinish(String dades) {
