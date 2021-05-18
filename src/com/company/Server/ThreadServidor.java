@@ -1,6 +1,7 @@
 package com.company.Server;
 
 import com.company.Game.Jugada;
+import com.company.Game.Respuesta;
 import com.company.Game.Tablero;
 
 import java.io.IOException;
@@ -11,7 +12,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class ThreadServidor implements Runnable{
-    /* Thread que gestiona la comunicació de SrvTcPAdivina.java i un cllient ClientTcpAdivina.java */
 
     Socket clientSocket;
     ObjectInputStream ois;
@@ -19,10 +19,11 @@ public class ThreadServidor implements Runnable{
     Jugada jugada;
     boolean acabat;
     Tablero tablero;
+    Respuesta respuesta;
 
-    public ThreadServidor(Socket clientSocket) throws IOException {
+    public ThreadServidor(Socket clientSocket, Tablero tablero) throws IOException {
         this.clientSocket = clientSocket;
-        tablero = new Tablero();
+        this.tablero = tablero;
         System.out.println(clientSocket.getInetAddress());
         acabat = false;
         oos = new ObjectOutputStream(clientSocket.getOutputStream());
@@ -36,12 +37,9 @@ public class ThreadServidor implements Runnable{
             while(!acabat) {
                 jugada = (Jugada) ois.readObject();
                 System.out.println(jugada.getNom());
-                tablero.haImpactado(jugada);
-                tablero = generaResposta(tablero);
-                oos.writeObject(tablero);
+                respuesta = generaResposta(tablero);
+                oos.writeObject(respuesta);
                 oos.flush();
-
-
             }
         }catch(IOException | ClassNotFoundException e){
             System.out.println(e.getLocalizedMessage());
@@ -54,13 +52,13 @@ public class ThreadServidor implements Runnable{
         }
     }
 
-    public Tablero generaResposta(Tablero tablero) {
+    public Respuesta generaResposta(Tablero tablero) {
+        Respuesta respuesta = new Respuesta();
         if (tablero != null){
-//            List<Integer> numerosDesordanados = .getNumberList();
-//            List<Integer> numerosOrdenados = numerosDesordanados.stream().sorted().distinct().collect(Collectors.toList());
-//            llista.setNumberList(numerosOrdenados);
-            return tablero;
+        respuesta.setRespuesta_Tablero(tablero.tablero_jugadores);
+        respuesta.setImpacto(tablero.haImpactado(jugada));
+            System.out.println("se ha enviado la respuesta: "+respuesta);
+        return respuesta;
         }else return null;
-
     }
 }

@@ -13,10 +13,9 @@ public class Tablero {
     public Tablero() {
         tablero_PosicionBarcos = new String[10][10];
         tablero_jugadores = new String[10][10];
-        rellenarTableroPosicion();
     }
 
-    private void rellenarTableroPosicion() {
+    public void rellenarTableroPosicion() {
         int x, y;
 
         for (int i = 0; i < 3; i++) {
@@ -70,18 +69,25 @@ public class Tablero {
         jugadores_conectados.put(nombre,getNumeroJugadores()+1);
     }
 
-    public String[][] haImpactado(Jugada jugada){
-        if (!jugada.Nom.equals("nuevoJugador")){
-            for (int i = 0; i < 10; i++) {
-                for (int j = 0; j < 10; j++) {
-                    if (i == jugada.x && j == jugada.y && !tablero_PosicionBarcos[i][j].equals("A")){
-                       tablero_jugadores[i][j] = jugada.Nom;
-                       return tablero_jugadores;
-                    }else return tablero_jugadores;
+    public String haImpactado(Jugada jugada){
+        for (int i = 0; i < 10; i++) {
+            for (int j = 0; j < 10; j++) {
+                if (i == jugada.x && j == jugada.y){
+                    String barco = tablero_PosicionBarcos[i][j];
+                    if (barco.equals("d")){
+                        tablero_jugadores[i][j] = jugada.Nom;
+                        return "Impacto en un destructor";
+                    }else if (barco.equals("f")){
+                        tablero_jugadores[i][j] = jugada.Nom;
+                        return "Impacto en una fragata";
+                    }else if (barco.equals("p")){
+                        tablero_jugadores[i][j] = jugada.Nom;
+                        return "Impacto en un portaaviones";
+                    }else {
+                        return "No ha habido impacto";
+                    }
                 }
             }
-        }else {
-            return tablero_jugadores;
         }
         return null;
     }

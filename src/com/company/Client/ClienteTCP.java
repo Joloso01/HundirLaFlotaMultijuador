@@ -1,6 +1,7 @@
 package com.company.Client;
 
 import com.company.Game.Jugada;
+import com.company.Game.Respuesta;
 import com.company.Game.Tablero;
 
 import java.io.IOException;
@@ -9,13 +10,12 @@ import java.io.ObjectOutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class ClienteTCP extends Thread{
+
     Scanner sc = new Scanner(System.in);
     Tablero tablero;
     String hostname;
@@ -23,6 +23,7 @@ public class ClienteTCP extends Thread{
     boolean continueConnected;
     int numeroJugada=0;
     String nombreUsuaior;
+    Respuesta respuestaServer;
 
 
     public ClienteTCP(String hostname, int port) {
@@ -40,15 +41,12 @@ public class ClienteTCP extends Thread{
             socket = new Socket(InetAddress.getByName(hostname), port);
             ois = new ObjectInputStream(socket.getInputStream());
             oos = new ObjectOutputStream(socket.getOutputStream());
-            //el client atén el port fins que decideix finalitzar
             while(continueConnected){
                 Jugada jugada = getRequest();
-                tablero.tablero_jugadores = (String[][]) ois.readObject();
                 oos.writeObject(jugada);
                 oos.flush();
-                //processament de les dades rebudes i obtenció d'una nova petició
-                //enviament el número i els intents
-
+                respuestaServer = (Respuesta) ois.readObject();
+                comprobarRespuesta(respuestaServer);
             }
             close(socket);
         } catch (UnknownHostException ex) {
@@ -58,6 +56,10 @@ public class ClienteTCP extends Thread{
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         }
+    }
+
+    private void comprobarRespuesta(Respuesta respuestaServer) {
+
     }
 
     public Jugada getRequest() {
