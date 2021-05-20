@@ -6,8 +6,7 @@ public class Jugada implements Serializable {
     public static final long serialVersionUID = 1L;
     String Nom;
     int x,y;
-
-
+    String[][] miTablero;
 
     public String getNom() {
         return Nom;
@@ -31,5 +30,13 @@ public class Jugada implements Serializable {
 
     public void setY(int y) {
         this.y = y;
+    }
+
+    public String[][] getMiTablero() {
+        return miTablero;
+    }
+
+    public void setMiTablero(String[][] miTablero) {
+        this.miTablero = miTablero;
     }
 }

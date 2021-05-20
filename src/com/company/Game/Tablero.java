@@ -57,7 +57,7 @@ public class Tablero {
             }
             colocado = false;
         }
-
+        System.out.println("Mi Tablero");
         for (int i = 0; i < 10; i++) {
             for (int j = 0; j < 10; j++) {
                 if (tablero_PosicionBarcos[i][j] == null){
@@ -95,6 +95,10 @@ public class Tablero {
         return null;
     }
 
+    public int numeroBarcos(){
+        return destructores+fragatas+portaaviones;
+    }
+
     public String getNombreTablero() {
         return nombreTablero;
     }
@@ -103,11 +107,11 @@ public class Tablero {
         this.nombreTablero = nombreTablero;
     }
 
-    public String[][] getTablero() {
+    public String[][] getTablero_jugadores() {
         return tablero_jugadores;
     }
 
-    public void setTablero(String[][] tablero) {
+    public void setTablero_jugadores(String[][] tablero) {
         this.tablero_jugadores = tablero;
     }
 }

@@ -4,31 +4,47 @@ import java.io.Serializable;
 
 public class Respuesta implements Serializable {
     public static final long serialVersionUID = 2L;
-    String nombreJugador;
-    String[][] respuesta_Tablero;
-    String impacto;
+    String[][] tableroServer;
+    String[][] tableroJugador;
+    boolean miTurno;
+    boolean gameOver;
 
-    public String[][] getRespuesta_Tablero() {
-        return respuesta_Tablero;
+    public Respuesta(String[][] tableroServer, String[][] tableroJugador, boolean miTurno, boolean gameOver) {
+        this.tableroServer = tableroServer;
+        this.tableroJugador = tableroJugador;
+        this.miTurno = miTurno;
+        this.gameOver = gameOver;
     }
 
-    public void setRespuesta_Tablero(String[][] respuesta_Tablero) {
-        this.respuesta_Tablero = respuesta_Tablero;
+    public String[][] getTableroServer() {
+        return tableroServer;
     }
 
-    public String getImpacto() {
-        return impacto;
+    public void setTableroServer(String[][] tableroServer) {
+        this.tableroServer = tableroServer;
     }
 
-    public void setImpacto(String impacto) {
-        this.impacto = impacto;
+    public String[][] getTableroJugador() {
+        return tableroJugador;
     }
 
-    public String getNombreJugador() {
-        return nombreJugador;
+    public void setTableroJugador(String[][] tableroJugador) {
+        this.tableroJugador = tableroJugador;
     }
 
-    public void setNombreJugador(String nombreJugador) {
-        this.nombreJugador = nombreJugador;
+    public boolean isMiTurno() {
+        return miTurno;
+    }
+
+    public void setMiTurno(boolean miTurno) {
+        this.miTurno = miTurno;
+    }
+
+    public boolean isGameOver() {
+        return gameOver;
+    }
+
+    public void setGameOver(boolean gameOver) {
+        this.gameOver = gameOver;
     }
 }

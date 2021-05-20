@@ -8,80 +8,106 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.List;
 
 public class ThreadServidor implements Runnable{
 
     String nombreUsuario;
-    Socket clientSocket;
+    Socket client1Socket;
+    Socket client2Socket;
+
     ObjectInputStream ois;
     ObjectOutputStream oos;
+    ObjectInputStream ois2;
+    ObjectOutputStream oos2;
+
     Jugada jugada;
     boolean acabat;
     Tablero tablero;
     Respuesta respuesta;
-    List<ThreadServidor> usuarios = new ArrayList<>();
+    boolean turno;
 
-    public ThreadServidor(Socket clientSocket) throws IOException {
-        this.clientSocket = clientSocket;
+    public ThreadServidor(Socket client1Socket, Socket client2Socket) throws IOException {
+
+        this.client1Socket = client1Socket;
+        this.client2Socket = client2Socket;
         tablero = new Tablero();
-        System.out.println(clientSocket.getInetAddress());
+        tablero.rellenarTableroPosicion();
+
         acabat = false;
-        oos = new ObjectOutputStream(clientSocket.getOutputStream());
-        ois = new ObjectInputStream(clientSocket.getInputStream());
+
+        oos = new ObjectOutputStream(this.client1Socket.getOutputStream());
+        ois = new ObjectInputStream(this.client1Socket.getInputStream());
+        oos2 = new ObjectOutputStream(this.client2Socket.getOutputStream());
+        ois2 = new ObjectInputStream(this.client2Socket.getInputStream());
     }
 
     @Override
     public void run() {
         try {
-            while(true) {
+            while(!acabat) {
+
                 jugada = (Jugada) ois.readObject();
                 System.out.println(jugada.getNom());
-                for (ThreadServidor ts : usuarios){
-                    if (ts.getNombreUsuario() != nombreUsuario){
-                        respuesta = generaResposta(ts.tablero);
-
-                    }
-                }
+                respuesta = generaResposta(jugada);
                 oos.writeObject(respuesta);
                 oos.flush();
+
+                turno = !turno;
+
+                jugada = (Jugada) ois2.readObject();
+                System.out.println(jugada.getNom());
+                respuesta = generaResposta(jugada);
+                oos2.writeObject(respuesta);
+                oos2.flush();
+
+
+
             }
         }catch(IOException | ClassNotFoundException e){
             System.out.println(e.getLocalizedMessage());
         }
 
         try {
-            clientSocket.close();
+            client1Socket.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    public Respuesta generaResposta(Tablero tablero) {
-        if (tablero != null){
-        for (ThreadServidor ts:usuarios){
-            if (ts.getNombreUsuario() != nombreUsuario){
-                respuesta.setNombreJugador(nombreUsuario);
-                respuesta.setRespuesta_Tablero(tablero.tablero_jugadores);
-                respuesta.setImpacto(tablero.haImpactado(jugada));
+    public Respuesta generaResposta(Jugada jugada) {
+        if (jugada != null){
+        return new Respuesta(comprobarImpactoTableroServer(jugada),realizarDisparoTableroJugador(jugada.getMiTablero()),!turno,JuegoAcabado());
+        }else return null;
+    }
+
+    private boolean JuegoAcabado() {
+        if (tablero.numeroBarcos() == 0){
+            return true;
+        }else return false;
+    }
+
+    private String[][] realizarDisparoTableroJugador(String[][] tableroCliente) {
+        int x = (int) (Math.random()*9);
+        int y = (int) (Math.random()*9);
+
+        for (int i = 0; i < 10; i++) {
+            for (int j = 0; j < 10; j++) {
+                if (i == x && j == y && tableroCliente[i][j] == null){
+                    tableroCliente[i][j] = "Server";
+                    return tableroCliente;
+                }
             }
         }
-            System.out.println("se ha enviado la respuesta: "+respuesta);
-        return respuesta;
-        }else return null;
+        return null;
+    }
+
+    private String[][] comprobarImpactoTableroServer(Jugada jugada) {
+        tablero.haImpactado(jugada);
+        return null;
     }
 
     public Tablero getTablero() {
         return tablero;
-    }
-
-    public List<ThreadServidor> getUsuarios() {
-        return usuarios;
-    }
-
-    public void setUsuarios(List<ThreadServidor> usuarios) {
-        this.usuarios = usuarios;
     }
 
     public String getNombreUsuario() {

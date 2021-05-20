@@ -17,21 +17,24 @@ import java.util.logging.Logger;
 public class ClienteTCP extends Thread{
 
     Scanner sc = new Scanner(System.in);
-    Tablero tablero;
+    Tablero tableroCliente;
     String hostname;
     int port;
     boolean continueConnected;
     int numeroJugada=0;
     String nombreUsuaior;
-    Respuesta respuestaServer;
+    Respuesta respuesta;
+    String[][] tableroServer = new String[10][10];
+    private boolean miTurno;
 
 
     public ClienteTCP(String hostname, int port) {
         this.hostname = hostname;
         this.port = port;
         continueConnected = true;
-        tablero = new Tablero();
-        tablero.rellenarTableroPosicion();
+        tableroCliente = new Tablero();
+        tableroCliente.rellenarTableroPosicion();
+
     }
 
     public void run() {
@@ -47,8 +50,8 @@ public class ClienteTCP extends Thread{
                 Jugada jugada = getRequest();
                 oos.writeObject(jugada);
                 oos.flush();
-                respuestaServer = (Respuesta) ois.readObject();
-                comprobarRespuesta(respuestaServer);
+                respuesta = (Respuesta) ois.readObject();
+                comprobarRespuesta(respuesta);
             }
             close(socket);
         } catch (UnknownHostException ex) {
@@ -62,8 +65,19 @@ public class ClienteTCP extends Thread{
 
     private void comprobarRespuesta(Respuesta respuestaServer) {
         if (respuestaServer != null){
-            tablero.setTablero(respuestaServer.getRespuesta_Tablero());
-            System.out.println(respuestaServer.getImpacto());
+            tableroCliente.setTablero_jugadores(respuesta.getTableroJugador());
+            miTurno = respuestaServer.isMiTurno();
+            tableroServer = respuestaServer.getTableroServer();
+            if (tableroServer != null){
+                System.out.println("Tablero server");
+                for (int i = 0; i < 10; i++) {
+                    for (int j = 0; j < 10; j++) {
+                        System.out.println(tableroServer[i][j]+"||");
+                    }
+                }
+            }
+
+
         }
     }
 
@@ -71,14 +85,10 @@ public class ClienteTCP extends Thread{
         Jugada jugada = new Jugada();
         int columna,fila;
 
-        if (respuestaServer != null){
-            jugada.setNom(respuestaServer.getNombreJugador());
-        }
-
         if (numeroJugada == 0){
-            numeroJugada++;
-            return jugada;
-        }else {
+            System.out.println("Introduce nombre de jugador: ");
+            nombreUsuaior = sc.nextLine();
+        }
             System.out.println("Selecciona columna: ");
             columna = sc.nextInt();
             System.out.println();
@@ -88,10 +98,11 @@ public class ClienteTCP extends Thread{
             jugada.setNom(nombreUsuaior);
             jugada.setX(columna);
             jugada.setY(fila);
+            jugada.setMiTablero(tableroCliente.getTablero_jugadores());
 
-            numeroJugada++;
-            return jugada;
-        }
+
+        numeroJugada++;
+        return jugada;
 
 
     }

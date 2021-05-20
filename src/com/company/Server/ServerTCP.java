@@ -12,10 +12,6 @@ import java.util.logging.Logger;
 
 public class ServerTCP {
 
-    private final int MAX_JUGADORS = 2;
-    private int jugadoresConectados=0;
-    private List<ThreadServidor>threadServidors = new ArrayList<>();
-
     int port;
 
     public ServerTCP(int port ) {
@@ -24,26 +20,16 @@ public class ServerTCP {
 
     public void listen() {
         ServerSocket serverSocket;
-        Socket clientSocket;
+        Socket client1Socket;
+        Socket client2Socket;
         try {
             serverSocket = new ServerSocket(port);
             while(true) {
-                clientSocket = serverSocket.accept();
-                if (jugadoresConectados < MAX_JUGADORS){
-                    ThreadServidor FilServidor = new ThreadServidor(clientSocket);
-                    threadServidors.add(FilServidor);
-                    if (threadServidors.size() == 1){
-                        FilServidor.setNombreUsuario("jugador1");
-                    }else {
-                        FilServidor.setNombreUsuario("jugador2");
-                    }
-                    jugadoresConectados++;
-                    for (ThreadServidor ts: threadServidors){
-                        ts.setUsuarios(threadServidors);
-                    }
-                    Thread client = new Thread(FilServidor);
-                    client.start();
-                }
+                client1Socket = serverSocket.accept();
+                client2Socket = serverSocket.accept();
+                ThreadServidor FilServidor = new ThreadServidor(client1Socket,client2Socket);
+                Thread client = new Thread(FilServidor);
+                client.start();
             }
         } catch (IOException ex) {
             Logger.getLogger(ServerTCP.class.getName()).log(Level.SEVERE, null, ex);
@@ -53,7 +39,6 @@ public class ServerTCP {
     public static void main(String[] args) {
         ServerTCP srv = new ServerTCP(5558);
         srv.listen();
-
     }
 
 }
