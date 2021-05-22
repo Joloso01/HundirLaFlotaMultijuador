@@ -134,7 +134,26 @@ public class ClienteTCP extends Thread{
     }
 
     public static void main(String[] args) {
-        ClienteTCP clientTcp = new ClienteTCP("localhost",5558);
-        clientTcp.start();
+        Scanner sc = new Scanner(System.in);
+        System.out.println(" Menu");
+        System.out.println("<---->");
+        System.out.println("1. Comenzar partida.");
+        System.out.println("2. Salir");
+        int opcion = sc.nextInt();
+        sc.nextLine();
+        switch (opcion){
+            case 1:
+
+                System.out.println("Introduzca la IP del server: ");
+                String ip = sc.nextLine();
+                System.out.println();
+                System.out.println("Introduzca el puerto del server: ");
+                int puerto = sc.nextInt();
+                ClienteTCP clientTcp = new ClienteTCP(ip,puerto);
+                clientTcp.start();
+                break;
+            case 2:
+                System.out.println("Cerrando la APP");
+        }
     }
 }
