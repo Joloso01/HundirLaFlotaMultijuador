@@ -23,6 +23,7 @@ public class ClienteTCP extends Thread{
     String nombreUsuario;
     RespuestaServer respuestaServer;
     private String nombreUsuarioTurno;
+    private String mensajeFinPartida;
 
     public ClienteTCP(String hostname, int port) {
         this.hostname = hostname;
@@ -52,12 +53,20 @@ public class ClienteTCP extends Thread{
                     oos.writeObject(jugada);
                     respuestaServer = (RespuestaServer) ois.readObject();
                     comprobarRespuestaServer(respuestaServer);
+                    if (respuestaServer.isGameOver()){
+                        mensajeFinPartida = (String) ois.readObject();
+                        System.out.println(mensajeFinPartida);
+                    }
 
                 }else {
                     System.out.println();
                     System.out.println("Turno del otro jugador");
                     respuestaServer = (RespuestaServer) ois.readObject();
                     comprobarRespuestaServer(respuestaServer);
+                    if (respuestaServer.isGameOver()){
+                        mensajeFinPartida = (String) ois.readObject();
+                        System.out.println(mensajeFinPartida);
+                    }
                 }
 
             }
@@ -110,7 +119,6 @@ public class ClienteTCP extends Thread{
 
     public boolean comprobarFinalEnemigo(boolean gameOver) {
         if (gameOver){
-            System.out.println("HAS GANADO");
             continueConnected = false;
             return false;
         }return continueConnected;

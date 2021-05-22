@@ -69,6 +69,12 @@ public class ThreadServidor implements Runnable{
                     oos.writeObject(respuestaServer);
                     oos2.reset();
                     oos2.writeObject(respuestaServer);
+                    if (juegoAcabado(tableroServer)){
+                        oos.reset();
+                        oos.writeObject("Felicidades Jugador 1 has ganado!!");
+                        oos2.reset();
+                        oos2.writeObject("Ha ganado el jugador 1, otra vez sera.");
+                    }
 
                 }else {
                     oos2.writeObject("jugador2");
@@ -81,6 +87,12 @@ public class ThreadServidor implements Runnable{
                     oos2.writeObject(respuestaServer);
                     oos.reset();
                     oos.writeObject(respuestaServer);
+                    if (juegoAcabado(tableroServer)){
+                        oos2.reset();
+                        oos2.writeObject("Felicidades Jugador 2 has ganado!!");
+                        oos.reset();
+                        oos.writeObject("Ha ganado el jugador 2, otra vez sera.");
+                    }
 
                 }
                 turno = !turno;
