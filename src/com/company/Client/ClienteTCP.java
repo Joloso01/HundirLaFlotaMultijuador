@@ -101,10 +101,10 @@ public class ClienteTCP extends Thread{
         int columna,fila;
 
         System.out.println("tu turno: ");
-        System.out.println("Selecciona columna: ");
+        System.out.println("Selecciona fila: ");
         columna = sc.nextInt();
         System.out.println();
-        System.out.println("Selecciona fila: ");
+        System.out.println("Selecciona columna: ");
         fila = sc.nextInt();
 
         if (nombreUsuario.equals("jugador1")){
