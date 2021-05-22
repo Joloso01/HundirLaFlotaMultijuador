@@ -1,8 +1,7 @@
 package com.company.Client;
 
 import com.company.Game.Jugada;
-import com.company.Game.Respuesta;
-import com.company.Game.Tablero;
+import com.company.Game.RespuestaServer;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -17,24 +16,18 @@ import java.util.logging.Logger;
 public class ClienteTCP extends Thread{
 
     Scanner sc = new Scanner(System.in);
-    Tablero tableroCliente;
     String hostname;
     int port;
     boolean continueConnected;
     int numeroJugada=0;
-    String nombreUsuaior;
-    Respuesta respuesta;
-    String[][] tableroServer = new String[10][10];
-    private boolean miTurno;
-
+    String nombreUsuario;
+    RespuestaServer respuestaServer;
+    private String nombreUsuarioTurno;
 
     public ClienteTCP(String hostname, int port) {
         this.hostname = hostname;
         this.port = port;
         continueConnected = true;
-        tableroCliente = new Tablero();
-        tableroCliente.rellenarTableroPosicion();
-
     }
 
     public void run() {
@@ -44,14 +37,29 @@ public class ClienteTCP extends Thread{
 
         try {
             socket = new Socket(InetAddress.getByName(hostname), port);
-            ois = new ObjectInputStream(socket.getInputStream());
             oos = new ObjectOutputStream(socket.getOutputStream());
+            ois = new ObjectInputStream(socket.getInputStream());
+
+            nombreUsuario = (String) ois.readObject();
+            respuestaServer = (RespuestaServer) ois.readObject();
+            comprobarRespuestaServer(respuestaServer);
+
             while(continueConnected){
-                Jugada jugada = getRequest();
-                oos.writeObject(jugada);
-                oos.flush();
-                respuesta = (Respuesta) ois.readObject();
-                comprobarRespuesta(respuesta);
+                nombreUsuarioTurno = (String) ois.readObject();
+
+                if (nombreUsuarioTurno.equals(nombreUsuario)){
+                    Jugada jugada = getRequest();
+                    oos.writeObject(jugada);
+                    respuestaServer = (RespuestaServer) ois.readObject();
+                    comprobarRespuestaServer(respuestaServer);
+
+                }else {
+                    System.out.println();
+                    System.out.println("Turno del otro jugador");
+                    respuestaServer = (RespuestaServer) ois.readObject();
+                    comprobarRespuestaServer(respuestaServer);
+                }
+
             }
             close(socket);
         } catch (UnknownHostException ex) {
@@ -63,21 +71,19 @@ public class ClienteTCP extends Thread{
         }
     }
 
-    private void comprobarRespuesta(Respuesta respuestaServer) {
+    private void comprobarRespuestaServer(RespuestaServer respuestaServer) {
         if (respuestaServer != null){
-            tableroCliente.setTablero_jugadores(respuesta.getTableroJugador());
-            miTurno = respuestaServer.isMiTurno();
-            tableroServer = respuestaServer.getTableroServer();
-            if (tableroServer != null){
-                System.out.println("Tablero server");
+            if (respuestaServer.getTablero() != null){
+                System.out.println("Tablero Enemigo");
                 for (int i = 0; i < 10; i++) {
                     for (int j = 0; j < 10; j++) {
-                        System.out.println(tableroServer[i][j]+"||");
+                        System.out.print(respuestaServer.getTablero()[i][j]+"||");
                     }
+                    System.out.println();
                 }
+                System.out.println(respuestaServer.getMensaje());
             }
-
-
+            comprobarFinalEnemigo(respuestaServer.isGameOver());
         }
     }
 
@@ -85,39 +91,34 @@ public class ClienteTCP extends Thread{
         Jugada jugada = new Jugada();
         int columna,fila;
 
-        if (numeroJugada == 0){
-            System.out.println("Introduce nombre de jugador: ");
-            nombreUsuaior = sc.nextLine();
-        }
-            System.out.println("Selecciona columna: ");
-            columna = sc.nextInt();
-            System.out.println();
-            System.out.println("Selecciona fila: ");
-            fila = sc.nextInt();
+        System.out.println("tu turno: ");
+        System.out.println("Selecciona columna: ");
+        columna = sc.nextInt();
+        System.out.println();
+        System.out.println("Selecciona fila: ");
+        fila = sc.nextInt();
 
-            jugada.setNom(nombreUsuaior);
-            jugada.setX(columna);
-            jugada.setY(fila);
-            jugada.setMiTablero(tableroCliente.getTablero_jugadores());
-
+        if (nombreUsuario.equals("jugador1")){
+            jugada.setNom("1");
+        }else jugada.setNom("2");
+        jugada.setX(columna);
+        jugada.setY(fila);
 
         numeroJugada++;
         return jugada;
-
-
     }
 
-    public boolean mustFinish(String dades) {
-        if (dades.equals("exit")) return false;
-        return true;
-
+    public boolean comprobarFinalEnemigo(boolean gameOver) {
+        if (gameOver){
+            System.out.println("HAS GANADO");
+            continueConnected = false;
+            return false;
+        }return continueConnected;
     }
+
 
     private void close(Socket socket){
-        //si falla el tancament no podem fer gaire cosa, només enregistrar
-        //el problema
         try {
-            //tancament de tots els recursos
             if(socket!=null && !socket.isClosed()){
                 if(!socket.isInputShutdown()){
                     socket.shutdownInput();
@@ -128,7 +129,6 @@ public class ClienteTCP extends Thread{
                 socket.close();
             }
         } catch (IOException ex) {
-            //enregistrem l'error amb un objecte Logger
             Logger.getLogger(ClienteTCP.class.getName()).log(Level.SEVERE, null, ex);
         }
     }

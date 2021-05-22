@@ -1,7 +1,8 @@
 package com.company.Server;
 
+
 import com.company.Game.Jugada;
-import com.company.Game.Respuesta;
+import com.company.Game.RespuestaServer;
 import com.company.Game.Tablero;
 
 import java.io.IOException;
@@ -11,7 +12,6 @@ import java.net.Socket;
 
 public class ThreadServidor implements Runnable{
 
-    String nombreUsuario;
     Socket client1Socket;
     Socket client2Socket;
 
@@ -22,46 +22,70 @@ public class ThreadServidor implements Runnable{
 
     Jugada jugada;
     boolean acabat;
-    Tablero tablero;
-    Respuesta respuesta;
-    boolean turno;
+    Tablero tableroServer = new Tablero();
+    RespuestaServer respuestaServer;
+    boolean turno = true;
 
     public ThreadServidor(Socket client1Socket, Socket client2Socket) throws IOException {
 
         this.client1Socket = client1Socket;
         this.client2Socket = client2Socket;
-        tablero = new Tablero();
-        tablero.rellenarTableroPosicion();
-
         acabat = false;
 
-        oos = new ObjectOutputStream(this.client1Socket.getOutputStream());
-        ois = new ObjectInputStream(this.client1Socket.getInputStream());
-        oos2 = new ObjectOutputStream(this.client2Socket.getOutputStream());
-        ois2 = new ObjectInputStream(this.client2Socket.getInputStream());
+        tableroServer.rellenarTableroPosicion();
+        tableroServer.rellenarTableroJugadores();
     }
 
     @Override
     public void run() {
         try {
+
+            ois = new ObjectInputStream(this.client1Socket.getInputStream());
+            oos = new ObjectOutputStream(this.client1Socket.getOutputStream());
+
+            ois2 = new ObjectInputStream(this.client2Socket.getInputStream());
+            oos2 = new ObjectOutputStream(this.client2Socket.getOutputStream());
+
+            oos.writeObject("jugador1");
+            oos2.writeObject("jugador2");
+            oos.reset();
+            oos2.reset();
+            oos.writeObject(new RespuestaServer("",tableroServer.tablero_jugadores, juegoAcabado(tableroServer)));
+            oos2.writeObject(new RespuestaServer("",tableroServer.tablero_jugadores, juegoAcabado(tableroServer)));
+
+
             while(!acabat) {
+                oos.reset();
+                oos2.reset();
 
-                jugada = (Jugada) ois.readObject();
-                System.out.println(jugada.getNom());
-                respuesta = generaResposta(jugada);
-                oos.writeObject(respuesta);
-                oos.flush();
+                if (turno){
+                    oos.writeObject("jugador1");
+                    oos2.writeObject("jugador1");
 
+                    jugada = (Jugada) ois.readObject();
+                    System.out.println(jugada.getNom());
+                    respuestaServer= generaResposta(jugada);
+                    oos.reset();
+                    oos.writeObject(respuestaServer);
+                    oos2.reset();
+                    oos2.writeObject(respuestaServer);
+
+                }else {
+                    oos2.writeObject("jugador2");
+                    oos.writeObject("jugador2");
+
+                    jugada = (Jugada) ois2.readObject();
+                    System.out.println(jugada.getNom());
+                    respuestaServer= generaResposta(jugada);
+                    oos2.reset();
+                    oos2.writeObject(respuestaServer);
+                    oos.reset();
+                    oos.writeObject(respuestaServer);
+
+                }
                 turno = !turno;
-
-                jugada = (Jugada) ois2.readObject();
-                System.out.println(jugada.getNom());
-                respuesta = generaResposta(jugada);
-                oos2.writeObject(respuesta);
+                oos.flush();
                 oos2.flush();
-
-
-
             }
         }catch(IOException | ClassNotFoundException e){
             System.out.println(e.getLocalizedMessage());
@@ -74,47 +98,21 @@ public class ThreadServidor implements Runnable{
         }
     }
 
-    public Respuesta generaResposta(Jugada jugada) {
+    public RespuestaServer generaResposta(Jugada jugada) {
         if (jugada != null){
-        return new Respuesta(comprobarImpactoTableroServer(jugada),realizarDisparoTableroJugador(jugada.getMiTablero()),!turno,JuegoAcabado());
+            respuestaServer = new RespuestaServer();
+            String mensaje = tableroServer.haImpactado(jugada);
+            respuestaServer.setMensaje(mensaje);
+            respuestaServer.setTablero(tableroServer.tablero_jugadores);
+            respuestaServer.setGameOver(juegoAcabado(tableroServer));
+            return respuestaServer;
+
         }else return null;
     }
 
-    private boolean JuegoAcabado() {
+    private boolean juegoAcabado(Tablero tablero) {
         if (tablero.numeroBarcos() == 0){
             return true;
         }else return false;
-    }
-
-    private String[][] realizarDisparoTableroJugador(String[][] tableroCliente) {
-        int x = (int) (Math.random()*9);
-        int y = (int) (Math.random()*9);
-
-        for (int i = 0; i < 10; i++) {
-            for (int j = 0; j < 10; j++) {
-                if (i == x && j == y && tableroCliente[i][j] == null){
-                    tableroCliente[i][j] = "Server";
-                    return tableroCliente;
-                }
-            }
-        }
-        return null;
-    }
-
-    private String[][] comprobarImpactoTableroServer(Jugada jugada) {
-        tablero.haImpactado(jugada);
-        return null;
-    }
-
-    public Tablero getTablero() {
-        return tablero;
-    }
-
-    public String getNombreUsuario() {
-        return nombreUsuario;
-    }
-
-    public void setNombreUsuario(String nombreUsuario) {
-        this.nombreUsuario = nombreUsuario;
     }
 }
