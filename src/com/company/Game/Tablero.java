@@ -105,7 +105,7 @@ public class Tablero implements Serializable {
                             case "P" -> {
                                 tablero_jugadores[i][j] = jugada.Nom;
                                 portaaviones--;
-                                return "Impacto en un portaaviones";
+                                return "Impacto en un porta aviones";
                             }
                             case "A" -> {
                                 tablero_jugadores[i][j] = jugada.Nom;
@@ -119,7 +119,7 @@ public class Tablero implements Serializable {
         return null;
     }
 
-    public int numeroBarcos(){
+    public int numBarcos(){
         return destructores+fragatas+portaaviones;
     }
 

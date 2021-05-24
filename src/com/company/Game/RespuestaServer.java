@@ -4,6 +4,7 @@ import java.io.Serializable;
 
 
 public class RespuestaServer implements Serializable {
+
     String mensaje;
     String[][] tablero;
     boolean gameOver;

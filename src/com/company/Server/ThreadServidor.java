@@ -123,7 +123,7 @@ public class ThreadServidor implements Runnable{
     }
 
     private boolean juegoAcabado(Tablero tablero) {
-        if (tablero.numeroBarcos() == 0){
+        if (tablero.numBarcos() == 0){
             return true;
         }else return false;
     }
